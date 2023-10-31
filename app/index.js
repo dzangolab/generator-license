@@ -19,6 +19,13 @@ module.exports = class GeneratorLicense extends Generator {
   constructor(args, opts) {
     super(args, opts);
 
+    this.option('generateInto', {
+      type: String,
+      required: false,
+      defaults: '',
+      desc: 'Relocate the location of the generated files.'
+    });
+    
     this.option('name', {
       type: String,
       desc: 'Name of the license owner',
@@ -144,7 +151,7 @@ module.exports = class GeneratorLicense extends Generator {
 
     this.fs.copyTpl(
       this.templatePath(filename),
-      this.destinationPath(this.options.output),
+      this.destinationPath(this.options.generateInto, this.options.output),
       {
         year: this.options.year,
         author: author
@@ -152,11 +159,11 @@ module.exports = class GeneratorLicense extends Generator {
     );
 
     // Package
-    if (!this.fs.exists(this.destinationPath('package.json'))) {
+    if (!this.fs.exists(this.destinationPath(this.options.generateInto, 'package.json'))) {
       return;
     }
 
-    const pkg = this.fs.readJSON(this.destinationPath('package.json'), {});
+    const pkg = this.fs.readJSON(this.destinationPath(this.options.generateInto, 'package.json'), {});
     pkg.license = this.props.license;
 
     if (
@@ -166,7 +173,7 @@ module.exports = class GeneratorLicense extends Generator {
       pkg.private = true;
     }
 
-    this.fs.writeJSON(this.destinationPath('package.json'), pkg);
+    this.fs.writeJSON(this.destinationPath(this.options.generateInto, 'package.json'), pkg);
   }
 };
 
